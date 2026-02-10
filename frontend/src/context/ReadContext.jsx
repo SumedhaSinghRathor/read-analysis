@@ -1,18 +1,29 @@
-import { createContext, useState } from "react";
-import reads2020 from "../assets/reads2020.json";
-import reads2021 from "../assets/reads2021.json";
-import reads2022 from "../assets/reads2022.json";
-import reads2023 from "../assets/reads2023.json";
-import reads2024 from "../assets/reads2024.json";
-import reads2025 from "../assets/reads2025.json";
-import reads2026 from "../assets/reads2026.json";
+import { createContext, useEffect, useState } from "react";
 import Form from "../charts/Form";
 
 const ReadContext = createContext();
 const readingYears = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
 
 export const ReadProvider = ({ children }) => {
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
+  const [reads, setReads] = useState([]);
   const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    const fetchReads = async () => {
+      try {
+        const response = await fetch(`${API_URL}`);
+        if (!response.ok) throw new Error("Failed to fetch reads");
+
+        const data = await response.json();
+        setReads(data);
+      } catch (error) {
+        console.error("Failed to fetch reads: ", error);
+      }
+    };
+
+    fetchReads();
+  }, [API_URL]);
 
   const [selectedYears, setSelectedYears] = useState(readingYears);
   const toggleYear = (year) => {
@@ -25,18 +36,14 @@ export const ReadProvider = ({ children }) => {
     setSelectedYears([year]);
   };
 
-  const datasets = {
-    2020: reads2020,
-    2021: reads2021,
-    2022: reads2022,
-    2023: reads2023,
-    2024: reads2024,
-    2025: reads2025,
-    2026: reads2026,
-  };
+  const selectedReads = reads.filter((r) => {
+    if (!r.finish_date) return false;
+
+    const year = new Date(r.finish_date).getFullYear();
+    return selectedYears.includes(year);
+  });
 
   const [type, setType] = useState(["Books", "Manga"]);
-  const selectedReads = selectedYears.flatMap((y) => datasets[y] || []);
   let selectedContent;
   if (type.includes("Books") && type.includes("Manga")) {
     selectedContent = selectedReads;

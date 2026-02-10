@@ -1,6 +1,7 @@
 import { useRef, useState } from "react";
 
 function Form({ onClose }) {
+  const API_URL = import.meta.env.VITE_BACKEND_URL;
   const modalRef = useRef();
   const closeModal = (e) => {
     if (modalRef.current === e.target) onClose();
@@ -18,6 +19,7 @@ function Form({ onClose }) {
     "Anthology",
   ];
   const [bookType, setBookType] = useState("Novel");
+  const [pageCount, setPageCount] = useState(0);
   const [startDate, setStartDate] = useState("");
   const [finishDate, setFinishDate] = useState("");
   const demos = [
@@ -31,14 +33,61 @@ function Form({ onClose }) {
   ];
   const [demographic, setDemographic] = useState("Young Adult");
   const [rating, setRating] = useState(null);
-  console.log(rating);
   const handleRating = (starIndex, isLeftHalf) => {
     const newRating = isLeftHalf ? starIndex + 0.5 : starIndex + 1;
     setRating(newRating);
   };
-  const [standAlone, setStandAlone] = useState(false);
+  const [standAlone, setStandAlone] = useState(true);
   const [partOfSeries, setPartOfSeries] = useState(null);
   const [fiction, setFiction] = useState(true);
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    const readData = {
+      title,
+      author,
+      book_type: bookType,
+      page_count: pageCount,
+      rating,
+      start_date: startDate,
+      finish_date: finishDate,
+      demographic,
+      standalone: standAlone,
+      partofseries: partOfSeries,
+      fiction,
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/post-read`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(readData),
+      });
+
+      if (!response.ok) throw new Error("Failed to add read");
+
+      alert("Read added successfully");
+      onClose();
+
+      setAuthor("");
+      setBookType("Novel");
+      setDemographic("Young Adult");
+      setFiction(true);
+      setFinishDate("");
+      setPageCount(0);
+      setPartOfSeries(null);
+      setRating(null);
+      setStandAlone(true);
+      setStartDate("");
+      setTitle("");
+
+      window.location.reload();
+    } catch (error) {
+      console.error("Error entering read data: ", error);
+    }
+  };
 
   return (
     <div
@@ -49,7 +98,11 @@ function Form({ onClose }) {
       <section className="bg-white w-3xl text-base p-8 rounded-2xl font-normal border">
         <h1 className="text-2xl font-semibold">Enter Your Last Read</h1>
         <hr className="my-2" />
-        <form action="" className="grid grid-cols-2 gap-2">
+        <form
+          action=""
+          className="grid grid-cols-2 gap-2"
+          onSubmit={handleSubmit}
+        >
           <label htmlFor="">
             Title: <br />
             <input
@@ -70,32 +123,43 @@ function Form({ onClose }) {
               className="w-full border rounded px-2 py-1 text-sm font-medium"
             />
           </label>
-          <label htmlFor="">
-            Book Type: <br />
-            <select
-              className="w-full border rounded px-2 py-1 text-sm font-medium"
-              required
-              value={bookType}
-              onChange={(e) => setBookType(e.target.value)}
-            >
-              {bookTypes.map((t) => (
-                <option key={t}>{t}</option>
-              ))}
-            </select>
-          </label>
-          <label htmlFor="">
-            Demographic: <br />
-            <select
-              className="w-full border rounded px-2 py-1 text-sm font-medium"
-              required
-              value={demographic}
-              onChange={(e) => setDemographic(e.target.value)}
-            >
-              {demos.map((d) => (
-                <option key={d}>{d}</option>
-              ))}
-            </select>
-          </label>
+          <div className="col-span-2 grid grid-cols-3 gap-2">
+            <label htmlFor="">
+              Book Type: <br />
+              <select
+                className="w-full border rounded px-2 py-1 text-sm font-medium"
+                required
+                value={bookType}
+                onChange={(e) => setBookType(e.target.value)}
+              >
+                {bookTypes.map((t) => (
+                  <option key={t}>{t}</option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor="">
+              Demographic: <br />
+              <select
+                className="w-full border rounded px-2 py-1 text-sm font-medium"
+                required
+                value={demographic}
+                onChange={(e) => setDemographic(e.target.value)}
+              >
+                {demos.map((d) => (
+                  <option key={d}>{d}</option>
+                ))}
+              </select>
+            </label>
+            <label htmlFor="">
+              Page Count: <br />
+              <input
+                type="number"
+                value={pageCount}
+                onChange={(e) => setPageCount(e.target.value)}
+                className="w-full border rounded px-2 py-1 text-sm font-medium"
+              />
+            </label>
+          </div>
           <label htmlFor="">
             Start Date: <br />
             <input
