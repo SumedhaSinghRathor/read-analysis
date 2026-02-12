@@ -12,12 +12,24 @@ import {
   Legend,
   Area,
   ComposedChart,
+  Cell,
 } from "recharts";
 import Reads from "./Reads";
 
 function Display() {
   const { selectedContent } = useContext(ReadContext);
   const card = "bg-white rounded-2xl shadow-md p-4 border border-indigo-100";
+  const colors = [
+    "#0088FE",
+    "#00C49F",
+    "#FFBB28",
+    "#FF8042",
+    "#201E50",
+    "#CD533B",
+    "#E09891",
+    "#3D0C11",
+  ];
+
   const page_count = selectedContent
     .flatMap((read) => read.page_count)
     .filter((val) => typeof val === "number" && !isNaN(val));
@@ -77,18 +89,6 @@ function Display() {
   const fictionData = Object.entries(fictionCounts).map(
     ([fiction, total_reads]) => ({
       fiction,
-      total_reads,
-    }),
-  );
-
-  const allReads = selectedContent.flatMap((read) => read.reread);
-  const reReadsCounts = allReads.reduce((acc, read) => {
-    acc[read] = (acc[read] || 0) + 1;
-    return acc;
-  }, {});
-  const rereadsData = Object.entries(reReadsCounts).map(
-    ([reread, total_reads]) => ({
-      reread,
       total_reads,
     }),
   );
@@ -207,8 +207,15 @@ function Display() {
               data={typeData}
               dataKey="total_reads"
               nameKey="type"
-              fill="#6366f1"
-            />
+              colors={colors}
+            >
+              {typeData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={colors[index % colors.length]}
+                />
+              ))}
+            </Pie>
             <Legend />
             <Tooltip />
           </PieChart>
@@ -223,7 +230,15 @@ function Display() {
               outerRadius={170}
               innerRadius={120}
               fill="#10b981"
-            />
+              colors={colors}
+            >
+              {fictionData.map((entry, index) => (
+                <Cell
+                  key={`cell-${index}`}
+                  fill={colors[index % colors.length]}
+                />
+              ))}
+            </Pie>
             <Legend />
             <Tooltip />
           </PieChart>
