@@ -4,4 +4,9 @@
 html,
 body {
   font-family: "Instrument Sans", sans-serif;
+  scrollbar-width: none;
+}
+
+button {
+  cursor: pointer;
 }

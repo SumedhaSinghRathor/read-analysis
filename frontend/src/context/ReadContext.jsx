@@ -56,7 +56,7 @@ export const ReadProvider = ({ children }) => {
   }
 
   return (
-    <ReadContext.Provider value={{ selectedContent }}>
+    <ReadContext.Provider value={{ selectedContent, selectedYears }}>
       <section className="grid grid-cols-7 m-4 gap-2 text-xl font-semibold">
         {["Books", "Manga"].map((t) => (
           <button

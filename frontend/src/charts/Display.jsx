@@ -1,4 +1,4 @@
-import { useContext } from "react";
+import { useContext, useState } from "react";
 import ReadContext from "../context/ReadContext";
 import {
   BarChart,
@@ -13,6 +13,7 @@ import {
   Area,
   ComposedChart,
 } from "recharts";
+import Reads from "./Reads";
 
 function Display() {
   const { selectedContent } = useContext(ReadContext);
@@ -80,6 +81,18 @@ function Display() {
     }),
   );
 
+  const allReads = selectedContent.flatMap((read) => read.reread);
+  const reReadsCounts = allReads.reduce((acc, read) => {
+    acc[read] = (acc[read] || 0) + 1;
+    return acc;
+  }, {});
+  const rereadsData = Object.entries(reReadsCounts).map(
+    ([reread, total_reads]) => ({
+      reread,
+      total_reads,
+    }),
+  );
+
   const allRatings = selectedContent
     .flatMap((read) => read.rating)
     .filter((rating) => rating !== null);
@@ -140,12 +153,21 @@ function Display() {
     total_pages: monthPageCounts[i],
   }));
 
+  const [showModal, setShowModal] = useState(false);
+
   return (
     <section>
       <section className="grid grid-cols-3 text-center gap-4 m-4">
-        <div className="bg-indigo-50 rounded-xl p-4 shadow-sm hover:ring-indigo-600 hover:ring-2 transition-all">
-          Total Reads: <b>{page_count.length} books</b>
-        </div>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-indigo-50 rounded-xl p-4 shadow-sm hover:ring-indigo-600 hover:ring-2 transition-all"
+        >
+          Total Reads:{" "}
+          <b>
+            {selectedContent.filter((r) => r.reread === false).length} books (+{" "}
+            {selectedContent.filter((r) => r.reread === true).length} rereads)
+          </b>
+        </button>
         <div className="bg-indigo-50 rounded-xl p-4 shadow-sm hover:ring-indigo-600 hover:ring-2 transition-all">
           Max Length: <b>{Math.max(...page_count)} pages</b>
         </div>
@@ -161,6 +183,12 @@ function Display() {
         <div className="bg-indigo-50 rounded-xl p-4 shadow-sm hover:ring-indigo-600 hover:ring-2 transition-all">
           Avg Duration: <b>{avgDuration} days</b>
         </div>
+        {showModal && (
+          <Reads
+            selectedContent={selectedContent}
+            onClose={() => setShowModal(false)}
+          />
+        )}
       </section>
       <section className="grid grid-cols-3 gap-4 m-4">
         <div className={`${card} col-span-2`}>
