@@ -6,6 +6,7 @@ function Form({ onClose }) {
   const closeModal = (e) => {
     if (modalRef.current === e.target) onClose();
   };
+  const [errors, setErrors] = useState("");
 
   const [results, setResults] = useState([]);
   const [showDropdown, setShowDropdown] = useState(false);
@@ -125,6 +126,11 @@ function Form({ onClose }) {
         body: JSON.stringify(readData),
       });
 
+      if (response.status === 409) {
+        setErrors("This read already exists. Try changing the read dates.");
+        return;
+      }
+
       if (!response.ok) throw new Error("Failed to add read");
 
       alert("Read added successfully");
@@ -145,6 +151,7 @@ function Form({ onClose }) {
       window.location.reload();
     } catch (error) {
       console.error("Error entering read data: ", error);
+      setErrors("An error occured while adding the read.");
     }
   };
 
@@ -156,6 +163,7 @@ function Form({ onClose }) {
     >
       <section className="bg-white w-3xl text-base p-8 rounded-2xl font-normal border">
         <h1 className="text-2xl font-semibold">Enter Your Last Read</h1>
+        {errors && <p className="text-sm text-red-600">{errors}</p>}
         <hr className="my-2" />
         <form
           action=""

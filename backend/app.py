@@ -68,6 +68,16 @@ def index():
 def add_read():
     data = request.get_json()
 
+    existing_read = Read.query.filter_by(
+        title=data['title'],
+        author=data['author'],
+        start_date=datetime.strptime(data['start_date'], "%Y-%m-%d").date(),
+        finish_date=datetime.strptime(data['finish_date'], "%Y-%m-%d").date()
+    ).first()
+
+    if existing_read:
+        return jsonify({'message': 'This read record already exists'}), 409
+
     new_read = Read(
         title=data['title'],
         author=data['author'],
