@@ -37,19 +37,7 @@ class Read(db.Model):
     standalone = db.Column(db.Boolean, nullable=False)
     partofseries = db.Column(db.String(40))
     fiction = db.Column(db.Boolean, nullable=False)
-
-    def __init__(self, title, author, book_type, page_count, rating, start_date, finish_date, demographic, standalone, partofseries, fiction):
-        self.title = title
-        self.author = author
-        self.book_type = book_type
-        self.page_count = page_count
-        self.rating = rating
-        self.start_date = start_date
-        self.finish_date = finish_date
-        self.demographic = demographic
-        self.standalone = standalone
-        self.partofseries = partofseries
-        self.fiction = fiction
+    reread = db.Column(db.Boolean)
 
 @app.route("/", methods=["GET"])
 def index():
@@ -70,7 +58,8 @@ def index():
             "demographic": r.demographic,
             "standalone": r.standalone,
             "partofseries": r.partofseries,
-            "fiction": r.fiction
+            "fiction": r.fiction,
+            "reread": r.reread
         })
 
     return jsonify(result)
