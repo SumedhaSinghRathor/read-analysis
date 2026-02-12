@@ -1,4 +1,4 @@
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 
 function Form({ onClose }) {
   const API_URL = import.meta.env.VITE_BACKEND_URL;
@@ -6,6 +6,9 @@ function Form({ onClose }) {
   const closeModal = (e) => {
     if (modalRef.current === e.target) onClose();
   };
+
+  const [results, setResults] = useState([]);
+  const [showDropdown, setShowDropdown] = useState(false);
 
   const [title, setTitle] = useState("");
   const [author, setAuthor] = useState("");
@@ -40,6 +43,62 @@ function Form({ onClose }) {
   const [standAlone, setStandAlone] = useState(true);
   const [partOfSeries, setPartOfSeries] = useState(null);
   const [fiction, setFiction] = useState(true);
+
+  useEffect(() => {
+    const fetchReads = async () => {
+      if (title.trim().length < 2) {
+        setResults([]);
+        setShowDropdown(false);
+        return;
+      }
+
+      try {
+        const response = await fetch(`${API_URL}`);
+        if (!response.ok) throw new Error("Failed to fetch reads");
+
+        const data = await response.json();
+
+        const matches = data.filter((m) =>
+          m.title.toLowerCase().includes(title.toLocaleLowerCase()),
+        );
+
+        if (matches.some((m) => m.title === title)) {
+          setShowDropdown(false);
+        }
+
+        setResults(matches.slice(0, 3));
+        setShowDropdown(true);
+      } catch (error) {
+        console.error("Failed to fetch reads: ", error);
+        setResults([]);
+      }
+    };
+
+    fetchReads();
+  }, [title, API_URL]);
+
+  const fillFormFromRead = (read) => {
+    setTitle(read.title || "");
+    setAuthor(read.author || "");
+    setBookType(read.book_type || "Novel");
+    setDemographic(read.demographic || "Young Adult");
+    setFiction(read.fiction ?? true);
+
+    setPageCount(read.page_count ?? 0);
+    setStartDate(read.start_date || "");
+    setFinishDate(read.finish_date || "");
+    setRating(read.rating ?? null);
+
+    if (read.standalone) {
+      setStandAlone(true);
+      setPartOfSeries("");
+    } else {
+      setStandAlone(false);
+      setPartOfSeries(read.partOfSeries || "");
+    }
+
+    setShowDropdown(false);
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -103,7 +162,7 @@ function Form({ onClose }) {
           className="grid grid-cols-2 gap-2"
           onSubmit={handleSubmit}
         >
-          <label htmlFor="">
+          <label htmlFor="" className="relative">
             Title: <br />
             <input
               type="text"
@@ -112,6 +171,19 @@ function Form({ onClose }) {
               value={title}
               onChange={(e) => setTitle(e.target.value)}
             />
+            {showDropdown && results.length > 0 && (
+              <ul className="absolute w-full bg-white border-x shadow-2xl">
+                {results.map((item) => (
+                  <li
+                    key={item.id}
+                    className="border-b p-1 hover:bg-slate-300"
+                    onClick={() => fillFormFromRead(item)}
+                  >
+                    {item.title}
+                  </li>
+                ))}
+              </ul>
+            )}
           </label>
           <label htmlFor="">
             Author: <br />
@@ -155,7 +227,7 @@ function Form({ onClose }) {
               <input
                 type="number"
                 value={pageCount}
-                onChange={(e) => setPageCount(e.target.value)}
+                onChange={(e) => setPageCount(Number(e.target.value))}
                 className="w-full border rounded px-2 py-1 text-sm font-medium"
               />
             </label>
