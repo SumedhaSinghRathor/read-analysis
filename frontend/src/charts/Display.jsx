@@ -194,7 +194,11 @@ function Display() {
         <div className={`${card} col-span-2`}>
           <BarChart data={demoData} style={{ aspectRatio: 2, width: "100%" }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <Bar dataKey="total_reads" fill="#6366f1" radius={[6, 6, 0, 0]} />
+            <Bar
+              dataKey="total_reads"
+              fill={colors[Math.floor(Math.random() * colors.length)]}
+              radius={[6, 6, 0, 0]}
+            />
             <XAxis dataKey="demographic" />
             <YAxis />
             <Tooltip />
@@ -209,7 +213,7 @@ function Display() {
               nameKey="type"
               colors={colors}
             >
-              {typeData.map((entry, index) => (
+              {typeData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={colors[index % colors.length]}
@@ -232,7 +236,7 @@ function Display() {
               fill="#10b981"
               colors={colors}
             >
-              {fictionData.map((entry, index) => (
+              {fictionData.map((_, index) => (
                 <Cell
                   key={`cell-${index}`}
                   fill={colors[index % colors.length]}
@@ -247,7 +251,11 @@ function Display() {
         <div className={`${card} col-span-2`}>
           <BarChart data={ratingData} style={{ aspectRatio: 2, width: "100%" }}>
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <Bar dataKey="total_reads" fill="#6366f1" radius={[6, 6, 0, 0]} />
+            <Bar
+              dataKey="total_reads"
+              fill={colors[Math.floor(Math.random() * colors.length)]}
+              radius={[6, 6, 0, 0]}
+            />
             <XAxis dataKey="rating" />
             <YAxis />
             <Tooltip />
@@ -262,7 +270,11 @@ function Display() {
             barSize={20}
           >
             <CartesianGrid strokeDasharray="3 3" stroke="#e5e7eb" />
-            <Bar dataKey="total_reads" fill="#6366f1" radius={[0, 6, 6, 0]} />
+            <Bar
+              dataKey="total_reads"
+              fill={colors[Math.floor(Math.random() * colors.length)]}
+              radius={[0, 6, 6, 0]}
+            />
             <XAxis type="number" />
             <YAxis type="category" dataKey="author" />
             <Tooltip />
