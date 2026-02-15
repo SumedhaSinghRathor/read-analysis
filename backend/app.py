@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request
+from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
@@ -96,6 +96,18 @@ def add_read():
     db.session.commit()
 
     return jsonify({'message': 'Read added successfully'}), 201
+
+@app.route("/delete-read/<int:id>", methods=["DELETE"])
+def delete_read(id):
+    read = Read.query.get(id)
+
+    if not read:
+        abort(404, description="Read not found")
+
+    db.session.delete(read)
+    db.session.commit()
+
+    return jsonify({"message": f"Read {id} deleted"}), 200
 
 if __name__ == "__main__":
     app.run(debug=True)
