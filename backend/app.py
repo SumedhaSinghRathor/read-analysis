@@ -1,6 +1,7 @@
 from flask import Flask, jsonify, request, abort
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
+from sqlalchemy.dialects.postgresql import ARRAY
 from dotenv import load_dotenv
 from datetime import datetime
 import os
@@ -38,6 +39,7 @@ class Read(db.Model):
     partofseries = db.Column(db.String(40))
     fiction = db.Column(db.Boolean, nullable=False)
     reread = db.Column(db.Boolean)
+    genres = db.Column(ARRAY(db.String), default=[None])
 
 @app.route("/", methods=["GET"])
 def index():
@@ -59,7 +61,8 @@ def index():
             "standalone": r.standalone,
             "partofseries": r.partofseries,
             "fiction": r.fiction,
-            "reread": r.reread
+            "reread": r.reread,
+            "genres": r.genres
         })
 
     return jsonify(result)
@@ -89,7 +92,8 @@ def add_read():
         demographic=data['demographic'],
         standalone=data['standalone'],
         partofseries=data.get('partofseries'),
-        fiction=data['fiction']
+        fiction=data['fiction'],
+        genres=data['genres']
     )
 
     db.session.add(new_read)

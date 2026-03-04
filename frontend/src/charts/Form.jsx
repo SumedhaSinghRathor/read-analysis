@@ -44,6 +44,21 @@ function Form({ onClose }) {
   const [standAlone, setStandAlone] = useState(true);
   const [partOfSeries, setPartOfSeries] = useState(null);
   const [fiction, setFiction] = useState(true);
+  const [genres, setGenres] = useState([]);
+  const [tag, setTag] = useState("");
+
+  const handleKeyDown = (e) => {
+    const newTag = tag.trim();
+
+    if (e.key !== "Tab" || newTag.length === 0) return;
+
+    if (!genres.includes(newTag)) setGenres([...genres, newTag]);
+    setTag("");
+  };
+
+  const deleteTag = (index) => {
+    setGenres(genres.filter((_, i) => i !== index));
+  };
 
   useEffect(() => {
     const fetchReads = async () => {
@@ -92,11 +107,13 @@ function Form({ onClose }) {
 
     if (read.standalone) {
       setStandAlone(true);
-      setPartOfSeries("");
+      setPartOfSeries(read.partofseries);
     } else {
       setStandAlone(false);
       setPartOfSeries(read.partOfSeries || "");
     }
+
+    setGenres(read.genres);
 
     setShowDropdown(false);
   };
@@ -115,6 +132,7 @@ function Form({ onClose }) {
       standalone: standAlone,
       partofseries: partOfSeries,
       fiction,
+      genres,
     };
 
     try {
@@ -147,6 +165,7 @@ function Form({ onClose }) {
       setStandAlone(true);
       setStartDate("");
       setTitle("");
+      setGenres([]);
 
       window.location.reload();
     } catch (error) {
@@ -257,6 +276,33 @@ function Form({ onClose }) {
               onChange={(e) => setFinishDate(e.target.value)}
               className="w-full border rounded px-2 py-1 text-sm font-medium"
             />
+          </label>
+          <label htmlFor="" className="col-span-2">
+            Genres:
+            <div className="p-2 rounded border w-full flex flex-wrap gap-2">
+              <div className="flex max-w-full shrink-0 flex-wrap gap-2">
+                {genres.map((t, index) => (
+                  <div
+                    key={index}
+                    className="flex items-center bg-indigo-600 text-white rounded-full px-2"
+                  >
+                    <span>{t}</span>
+                    <i
+                      className="bx bx-x text-lg cursor-pointer"
+                      onClick={() => deleteTag(index)}
+                    />
+                  </div>
+                ))}
+              </div>
+              <input
+                type="text"
+                placeholder="Enter related genres"
+                value={tag}
+                onChange={(e) => setTag(e.target.value)}
+                onKeyDown={handleKeyDown}
+                className="grow w-fit focus:outline-0"
+              />
+            </div>
           </label>
           <div className="col-span-2 grid grid-cols-1 sm:grid-cols-3 gap-3 items-center p-2">
             {bookType !== "Manga" && (
